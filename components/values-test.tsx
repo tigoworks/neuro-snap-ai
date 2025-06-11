@@ -379,7 +379,7 @@ export default function ValuesTest({
                 </>
               ) : (
                 <>
-                  提交
+                  提交答卷
                   <ChevronRight className="w-5 h-5" />
                 </>
               )}

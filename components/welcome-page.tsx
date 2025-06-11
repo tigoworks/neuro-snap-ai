@@ -3,12 +3,29 @@
 import { motion } from "framer-motion"
 import { Sparkles, ChevronRight } from "lucide-react"
 import Image from "next/image"
+import { useEffect } from "react"
 
 interface WelcomePageProps {
   onNext: () => void;
 }
 
 export default function WelcomePage({ onNext }: WelcomePageProps) {
+  useEffect(() => {
+    console.log('WelcomePage mounted');
+    return () => {
+      console.log('WelcomePage unmounted');
+    };
+  }, []);
+
+  const handleClick = () => {
+    console.log('Start test button clicked');
+    try {
+      onNext();
+    } catch (error) {
+      console.error('Error in onNext:', error);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
       <motion.div
@@ -34,6 +51,7 @@ export default function WelcomePage({ onNext }: WelcomePageProps) {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
         className="text-3xl font-bold mb-4 text-gray-800 leading-tight"
+        data-testid="welcome-title"
       >
         了解你自己，解锁你的潜力画像
       </motion.h1>
@@ -43,6 +61,7 @@ export default function WelcomePage({ onNext }: WelcomePageProps) {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.5 }}
         className="text-gray-600 mb-8 max-w-xs"
+        data-testid="welcome-description"
       >
         通过这份全面的性格测试，探索你的内在世界，获取专属个性AI分析报告，发现你的潜能。
       </motion.p>
@@ -94,7 +113,7 @@ export default function WelcomePage({ onNext }: WelcomePageProps) {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.5 }}
-        onClick={onNext}
+        onClick={handleClick}
         data-testid="start-test-button"
         className="mt-6 px-8 py-4 bg-gradient-to-r from-teal-500 to-blue-500 text-gray-900 font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 group"
       >

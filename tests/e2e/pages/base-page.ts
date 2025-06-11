@@ -2,6 +2,8 @@ import { Page } from '@playwright/test';
 
 export class BasePage {
   protected page: Page;
+  private readonly maxRetries = 3;
+  private readonly retryDelay = 1000;
 
   constructor(page: Page) {
     this.page = page;
@@ -11,13 +13,21 @@ export class BasePage {
    * 等待页面加载完成
    */
   protected async waitForPageLoad(): Promise<void> {
+    let retries = 0;
+    while (retries < this.maxRetries) {
     try {
       await this.page.waitForLoadState('domcontentloaded');
       await this.page.waitForLoadState('networkidle');
       console.log('✅ 页面加载完成');
+        return;
     } catch (error) {
-      console.error('❌ 页面加载失败:', error);
+        retries++;
+        console.error(`❌ 页面加载失败 (尝试 ${retries}/${this.maxRetries}):`, error);
+        if (retries === this.maxRetries) {
       throw error;
+        }
+        await this.page.waitForTimeout(this.retryDelay);
+      }
     }
   }
 
@@ -25,12 +35,20 @@ export class BasePage {
    * 等待元素可见
    */
   protected async waitForElement(selector: string, timeout: number = 30000): Promise<void> {
+    let retries = 0;
+    while (retries < this.maxRetries) {
     try {
       await this.page.waitForSelector(selector, { state: 'visible', timeout });
       console.log(`✅ 元素 ${selector} 已可见`);
+        return;
     } catch (error) {
-      console.error(`❌ 等待元素 ${selector} 失败:`, error);
+        retries++;
+        console.error(`❌ 等待元素 ${selector} 失败 (尝试 ${retries}/${this.maxRetries}):`, error);
+        if (retries === this.maxRetries) {
       throw error;
+        }
+        await this.page.waitForTimeout(this.retryDelay);
+      }
     }
   }
 
@@ -38,13 +56,21 @@ export class BasePage {
    * 点击元素
    */
   protected async click(selector: string): Promise<void> {
+    let retries = 0;
+    while (retries < this.maxRetries) {
     try {
       await this.waitForElement(selector);
       await this.page.click(selector);
       console.log(`✅ 点击元素 ${selector} 成功`);
+        return;
     } catch (error) {
-      console.error(`❌ 点击元素 ${selector} 失败:`, error);
+        retries++;
+        console.error(`❌ 点击元素 ${selector} 失败 (尝试 ${retries}/${this.maxRetries}):`, error);
+        if (retries === this.maxRetries) {
       throw error;
+        }
+        await this.page.waitForTimeout(this.retryDelay);
+      }
     }
   }
 

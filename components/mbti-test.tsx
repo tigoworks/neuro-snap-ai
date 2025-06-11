@@ -201,7 +201,7 @@ export default function MbtiTest({ data, onDataUpdate, onNext, onPrev }: MbtiPro
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-6">
+    <div className="bg-white rounded-2xl shadow-md p-6" data-testid="mbti-test">
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }}>
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">

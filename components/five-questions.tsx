@@ -48,10 +48,10 @@ export default function FiveQuestions({
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch('/api/survey-questions?model=fiveq')
-        if (!response.ok) {
-          throw new Error('Failed to fetch questions')
-        }
+        // 使用新的API配置 - 支持环境变量切换
+        const { apiRequest } = await import('@/lib/api')
+        const response = await apiRequest('/api/survey-questions?model=fiveq')
+        
         const data = await response.json()
         setQuestions(data.questions)
       } catch (error) {
@@ -94,8 +94,9 @@ export default function FiveQuestions({
   const validateForm = () => {
     const newErrors: FormErrors = {}
 
+    // 只验证从API获取的问题，忽略其他元素
     questions.forEach((q) => {
-      if (q.required && (!formData[q.question_code] || formData[q.question_code].trim() === "")) {
+      if (q.required && q.question_code && (!formData[q.question_code] || formData[q.question_code].trim() === "")) {
         newErrors[q.question_code] = "请回答这个问题"
       }
     })
@@ -111,12 +112,23 @@ export default function FiveQuestions({
     // 标记所有字段为已触碰
     const allTouched: Record<string, boolean> = {}
     questions.forEach((q) => {
-      allTouched[q.question_code] = true
+      if (q.question_code) {
+        allTouched[q.question_code] = true
+      }
     })
     setTouched(allTouched)
 
     if (validateForm()) {
-      onDataUpdate(formData)
+      // 只发送有效问题的数据，过滤掉空的question_code
+      const validFormData: FiveQuestionsData = {}
+      questions.forEach((q) => {
+        if (q.question_code && formData[q.question_code]) {
+          validFormData[q.question_code] = formData[q.question_code]
+        }
+      })
+      
+      console.log('五问题提交数据:', validFormData)
+      onDataUpdate(validFormData)
       onNext()
     } else {
       // 滚动到第一个错误
@@ -170,7 +182,12 @@ export default function FiveQuestions({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {questions.map((q, index) => (
+          {questions.map((q, index) => {
+            // 调试信息
+            if (index === 0) {
+              console.log('🔍 渲染五问法，问题数量:', questions.length, '问题列表:', questions.map(q => ({code: q.question_code, content: q.content.substring(0, 30)})));
+            }
+            return (
             <div key={q.question_code} className="pb-6 border-b border-gray-100 last:border-0">
               <label className="block text-base font-medium text-gray-800 mb-2">
                 {index + 1}. {q.content}
@@ -217,7 +234,8 @@ export default function FiveQuestions({
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
 
           {/* 导航按钮 */}
           <div className="flex gap-3 pt-4">

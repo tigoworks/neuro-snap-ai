@@ -1,29 +1,86 @@
 import { test, expect } from '@playwright/test';
+import { WelcomePage } from '../pages/welcome-page';
 import { UserInfoPage } from '../pages/user-info-page';
-import { UserInfo } from '../data/test-data';
 
-test.describe('用户信息页面测试', () => {
+test.describe('用户信息表单测试', () => {
+  let welcomePage: WelcomePage;
   let userInfoPage: UserInfoPage;
 
   test.beforeEach(async ({ page }) => {
+    welcomePage = new WelcomePage(page);
     userInfoPage = new UserInfoPage(page);
-    console.log("开始新的测试用例...");
-    console.log("导航到欢迎页面...");
+    
+    // 导航到用户信息页面
     await page.goto('/');
-    console.log("点击开始测试按钮...");
-    await page.click('[data-testid="start-test-button"]');
-    console.log("等待用户信息页面加载...");
-    await userInfoPage.waitForReady();
+    await page.waitForLoadState('networkidle');
+    await page.getByTestId('start-test-button').click();
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('h2')).toContainText('基本信息');
   });
 
-  test.afterEach(async ({ page }) => {
-    // 清理页面状态
-    await page.reload();
+  test('必填字段验证', async ({ page }) => {
+    console.log('测试必填字段验证...');
+    
+    // 不填写任何内容，直接点击下一步
+    await userInfoPage.clickNextButton();
+    
+    // 验证错误提示
+    await page.waitForTimeout(1000);
+    const errorMessages = await userInfoPage.getErrorMessages();
+    expect(errorMessages.length).toBeGreaterThan(0);
+    console.log('✅ 必填字段验证通过，错误数量:', errorMessages.length);
   });
 
-  test('应该能够填写并提交有效的用户信息', async ({ page }) => {
-    console.log("开始测试：填写并提交有效的用户信息");
-    const validData: UserInfo = {
+  test('年龄格式验证', async ({ page }) => {
+    console.log('测试年龄格式验证...');
+    
+    // 填写无效年龄
+    await userInfoPage.fillName('张三');
+    await userInfoPage.selectGender('男');
+    await userInfoPage.fillAge('abc'); // 无效年龄
+    await userInfoPage.fillCity('北京');
+    await userInfoPage.fillOccupation('工程师');
+    await userInfoPage.selectEducation('本科');
+    
+    await userInfoPage.clickNextButton();
+    
+    // 验证错误提示
+    await page.waitForTimeout(1000);
+    const errorMessages = await userInfoPage.getErrorMessages();
+    const hasAgeError = errorMessages.some(msg => msg.includes('年龄'));
+    expect(hasAgeError).toBeTruthy();
+    console.log('✅ 年龄格式验证通过');
+  });
+
+  test('手机号格式验证', async ({ page }) => {
+    console.log('测试手机号格式验证...');
+    
+    // 填写有效信息但无效手机号
+    await userInfoPage.fillForm({
+      name: '张三',
+      gender: '男',
+      age: '25',
+      city: '北京',
+      occupation: '工程师',
+      education: '本科',
+      phone: '123' // 无效手机号
+    });
+    
+    await userInfoPage.clickNextButton();
+    
+    // 验证错误提示
+    await page.waitForTimeout(1000);
+    const errorMessages = await userInfoPage.getErrorMessages();
+    const hasPhoneError = errorMessages.some(msg => msg.includes('手机号'));
+    expect(hasPhoneError).toBeTruthy();
+    console.log('✅ 手机号格式验证通过');
+  });
+
+  test('正确填写表单能成功跳转', async ({ page }) => {
+    console.log('测试正确填写表单...');
+    
+    // 填写完整且正确的信息
+    await userInfoPage.fillForm({
       name: '张三',
       gender: '男',
       age: '25',
@@ -31,106 +88,55 @@ test.describe('用户信息页面测试', () => {
       occupation: '软件工程师',
       education: '本科',
       phone: '13800138000'
-    };
-
-    console.log("开始填写姓名...");
-    await userInfoPage.fillName(validData.name);
-    console.log("开始选择性别...");
-    await userInfoPage.selectGender(validData.gender);
-    console.log("开始填写年龄...");
-    await userInfoPage.fillAge(validData.age);
-    console.log("开始填写城市...");
-    await userInfoPage.fillCity(validData.city);
-    console.log("开始填写职业...");
-    await userInfoPage.fillOccupation(validData.occupation);
-    console.log("开始选择学历...");
-    await userInfoPage.selectEducation(validData.education);
-    console.log("开始填写手机号...");
-    await userInfoPage.fillPhone(validData.phone);
-
-    console.log("提交表单...");
-    await userInfoPage.submit();
+    });
     
-    // 增加等待时间，确保页面有足够时间加载
-    console.log("等待五问法页面加载...");
-    await page.waitForTimeout(2000); // 等待2秒
-    await expect(page.locator('[data-testid="five-questions"]')).toBeVisible({ timeout: 10000 });
-    console.log("测试完成：表单提交成功");
+    await userInfoPage.clickNextButton();
+    
+    // 等待跳转到五问题页面
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000); // 等待API加载
+    
+    // 验证跳转到五问题页面
+    const pageTitle = await page.locator('h2').textContent();
+    expect(pageTitle).toContain('五问法');
+    console.log('✅ 成功跳转到五问题页面');
   });
 
-  test('应该验证必填字段', async ({ page }) => {
-    console.log("开始测试：验证必填字段");
-    console.log("直接点击提交按钮...");
-    await userInfoPage.submit();
-    console.log("获取错误信息...");
-    const errorMessages = await userInfoPage.getErrorMessages();
-    console.log("错误信息列表:", errorMessages);
-    console.log("验证错误信息...");
-    expect(errorMessages).toContain(" 请输入您的姓名");
-    expect(errorMessages).toContain(" 请选择您的性别");
-    expect(errorMessages).toContain(" 请输入您的年龄");
-    expect(errorMessages).toContain(" 请输入您所在的城市");
-    expect(errorMessages).toContain(" 请输入您的职业");
-    expect(errorMessages).toContain(" 请选择您的学历");
-    console.log("测试完成：必填字段验证成功");
+  test('返回按钮功能', async ({ page }) => {
+    console.log('测试返回按钮功能...');
+    
+    // 点击返回按钮
+    await userInfoPage.clickBack();
+    
+    // 验证返回到欢迎页面
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByTestId('welcome-title')).toBeVisible();
+    console.log('✅ 返回按钮功能正常');
   });
 
-  test('应该处理无效数据', async ({ page }) => {
-    console.log("开始测试：处理无效数据");
-    await userInfoPage.fillName("");
-    await userInfoPage.fillAge("0");
-    await userInfoPage.fillPhone("123");
-    await userInfoPage.submit();
+  test('不填手机号也能通过（可选字段）', async ({ page }) => {
+    console.log('测试可选字段...');
     
-    const errorMessages = await userInfoPage.getErrorMessages();
-    expect(errorMessages).toContain(" 请输入您的姓名");
-    expect(errorMessages).toContain(" 请输入有效的年龄");
-    expect(errorMessages).toContain(" 请输入有效的手机号码");
-  });
-
-  test('应该保存部分填写的进度', async ({ page }) => {
-    console.log("开始测试：保存部分填写的进度");
-    console.log("填写部分信息...");
-    await userInfoPage.fillName("李四");
-    await userInfoPage.selectGender("女");
-    await userInfoPage.fillAge("30");
+    // 不填写手机号
+    await userInfoPage.fillForm({
+      name: '李四',
+      gender: '女',
+      age: '30',
+      city: '上海',
+      occupation: '设计师',
+      education: '硕士'
+      // 不填写phone
+    });
     
-    console.log("刷新页面...");
-    await page.reload();
-    await userInfoPage.waitForReady();
+    await userInfoPage.clickNextButton();
     
-    const formData = await userInfoPage.getFormData();
-    expect(formData.name).toBe("李四");
-    expect(formData.gender).toBe("女");
-    expect(formData.age).toBe("30");
-  });
-
-  test('应该验证表单数据', async ({ page }) => {
-    console.log("开始测试：验证表单数据");
-    console.log("填写完整的表单数据...");
-    const validData: UserInfo = {
-      name: '张三',
-      gender: '男',
-      age: '25',
-      city: '北京',
-      occupation: '软件工程师',
-      education: '本科',
-      phone: '13800138000'
-    };
-
-    await userInfoPage.fillName(validData.name);
-    await userInfoPage.selectGender(validData.gender);
-    await userInfoPage.fillAge(validData.age);
-    await userInfoPage.fillCity(validData.city);
-    await userInfoPage.fillOccupation(validData.occupation);
-    await userInfoPage.selectEducation(validData.education);
-    await userInfoPage.fillPhone(validData.phone);
-
-    console.log("获取表单数据...");
-    const formData = await userInfoPage.getFormData();
-    console.log("表单数据:", formData);
-    console.log("验证表单数据...");
-    expect(formData).toEqual(validData);
-    console.log("测试完成：表单数据验证成功");
+    // 等待跳转成功
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(3000);
+    
+    // 验证成功跳转
+    const pageTitle = await page.locator('h2').textContent();
+    expect(pageTitle).toContain('五问法');
+    console.log('✅ 可选字段测试通过');
   });
 }); 

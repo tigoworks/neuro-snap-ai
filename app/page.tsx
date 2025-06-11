@@ -144,8 +144,17 @@ export default function PersonalityTest() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
+  useEffect(() => {
+    console.log('PersonalityTest mounted');
+    console.log('Current stage:', STAGES[currentStage]);
+    return () => {
+      console.log('PersonalityTest unmounted');
+    };
+  }, [currentStage]);
+
   // 处理数据更新
   const handleDataUpdate = (stage: keyof FormData, data: Partial<FormData[keyof FormData]>) => {
+    console.log('Updating data for stage:', stage);
     setFormData(prev => ({
       ...prev,
       [stage]: {
@@ -157,13 +166,20 @@ export default function PersonalityTest() {
 
   // 处理下一步
   const handleNext = () => {
+    console.log('Moving to next stage');
+    console.log('Current stage before update:', STAGES[currentStage]);
     if (currentStage < STAGES.length - 1) {
-      setCurrentStage(prev => prev + 1)
+      setCurrentStage(prev => {
+        const nextStage = prev + 1;
+        console.log('Next stage will be:', STAGES[nextStage]);
+        return nextStage;
+      });
     }
   }
 
   // 处理上一步
   const handlePrev = () => {
+    console.log('Moving to previous stage');
     if (currentStage > 0) {
       setCurrentStage(prev => prev - 1)
     }
@@ -171,6 +187,7 @@ export default function PersonalityTest() {
 
   // 处理提交
   const handleSubmit = async () => {
+    console.log('Submitting form data');
     setIsSubmitting(true)
     setSubmitError(null)
 
@@ -198,6 +215,7 @@ export default function PersonalityTest() {
 
   // 渲染当前阶段的组件
   const renderCurrentStage = () => {
+    console.log('Rendering stage:', STAGES[currentStage]);
     switch (STAGES[currentStage]) {
       case "welcome":
         return <WelcomePage onNext={handleNext} />
@@ -269,7 +287,7 @@ export default function PersonalityTest() {
       case "submission":
         return <SubmissionPage />
       default:
-        return <WelcomePage onNext={handleNext} />
+        return null
     }
   }
 
