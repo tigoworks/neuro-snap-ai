@@ -64,11 +64,9 @@ export default function HollandTest({ data, onDataUpdate, onNext, onPrev }: Holl
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch('/api/survey-questions?model=holland')
-        if (!response.ok) {
-          throw new Error('Failed to fetch questions')
-        }
-        const data = await response.json()
+        // 使用新的SDK获取霍兰德题目
+        const { sdk } = await import('@/lib/backend-api')
+        const data = await sdk.getSurveyQuestions('holland')
         if (Array.isArray(data.questions)) {
           setQuestions(data.questions)
         } else {

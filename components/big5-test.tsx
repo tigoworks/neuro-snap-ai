@@ -62,11 +62,9 @@ export default function Big5Test({ data, onDataUpdate, onNext, onPrev }: Big5Pro
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch('/api/survey-questions?model=big5')
-        if (!response.ok) {
-          throw new Error('Failed to fetch questions')
-        }
-        const data = await response.json()
+        // 使用新的SDK获取大五人格题目
+        const { sdk } = await import('@/lib/backend-api')
+        const data = await sdk.getSurveyQuestions('big5')
         setQuestions(data.questions)
       } catch (error) {
         console.error('Error fetching questions:', error)

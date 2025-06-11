@@ -192,22 +192,66 @@ export default function PersonalityTest() {
     setSubmitError(null)
 
     try {
-      const response = await fetch('/api/submit-test', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        throw new Error('提交失败')
+      // 使用新的SDK提交测试数据
+      const { sdk } = await import('@/lib/backend-api')
+      
+      // 清理数据，移除计算结果，只保留原始答案
+      const cleanAnswers = (data: any) => {
+        const cleaned: any = {}
+        Object.keys(data).forEach(key => {
+          // 跳过计算结果（如 result, scores 等）
+          if (key !== 'result' && key !== 'scores' && typeof data[key] !== 'object') {
+            cleaned[key] = data[key]
+          }
+        })
+        return cleaned
       }
-
+      
+      // 准备用户信息 - 转换格式以符合API要求
+      const userInfo = {
+        name: formData.userInfo.name,
+        gender: formData.userInfo.gender === '男' ? 'male' : 
+                formData.userInfo.gender === '女' ? 'female' : 
+                formData.userInfo.gender, // 保持原值如果已经是 male/female
+        age: parseInt(formData.userInfo.age) || 0,  // 转换为数字
+        city: formData.userInfo.city,
+        occupation: formData.userInfo.occupation,
+        education: formData.userInfo.education,
+        phone: formData.userInfo.phone || undefined
+      }
+      
+      // 构造完整的提交数据，符合API文档要求
+      const completeAnswers = {
+        userInfo,
+        fiveQuestions: cleanAnswers(formData.fiveQuestions),
+        mbti: cleanAnswers(formData.mbti),
+        bigFive: cleanAnswers(formData.bigFive),
+        disc: cleanAnswers(formData.disc),
+        holland: cleanAnswers(formData.holland),
+        values: cleanAnswers(formData.values)
+      }
+      
+      console.log('=== 完整答案提交 ===')
+      console.log('API调用: POST /api/answer/submit')
+      console.log('提交数据:', completeAnswers)
+      console.log('数据统计:')
+      console.log('  - 用户信息:', Object.keys(completeAnswers.userInfo).length, '个字段')
+      console.log('  - 五问法答案:', Object.keys(completeAnswers.fiveQuestions).length, '个')
+      console.log('  - MBTI答案:', Object.keys(completeAnswers.mbti).length, '个')
+      console.log('  - 大五人格答案:', Object.keys(completeAnswers.bigFive).length, '个')
+      console.log('  - DISC答案:', Object.keys(completeAnswers.disc).length, '个')
+      console.log('  - 霍兰德答案:', Object.keys(completeAnswers.holland).length, '个')
+      console.log('  - 价值观答案:', Object.keys(completeAnswers.values).length, '个')
+      
+      // 调用新的完整提交API
+      const result = await sdk.submitCompleteAnswers(completeAnswers)
+      console.log('提交成功:', result)
+      
       handleNext()
     } catch (error) {
       console.error('提交失败:', error)
-      setSubmitError('提交失败，请稍后重试')
+      const errorMessage = error instanceof Error ? error.message : '提交失败，请稍后重试'
+      setSubmitError(`提交失败: ${errorMessage}`)
     } finally {
       setIsSubmitting(false)
     }

@@ -48,11 +48,10 @@ export default function FiveQuestions({
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        // 使用新的API配置 - 支持环境变量切换
-        const { apiRequest } = await import('@/lib/api')
-        const response = await apiRequest('/api/survey-questions?model=fiveq')
+        // 使用新的SDK获取五问法题目
+        const { sdk } = await import('@/lib/backend-api')
+        const data = await sdk.getSurveyQuestions('fiveq')
         
-        const data = await response.json()
         setQuestions(data.questions)
       } catch (error) {
         console.error('Error fetching questions:', error)

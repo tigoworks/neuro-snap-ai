@@ -63,11 +63,9 @@ export default function MbtiTest({ data, onDataUpdate, onNext, onPrev }: MbtiPro
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch('/api/survey-questions?model=mbti')
-        if (!response.ok) {
-          throw new Error('Failed to fetch questions')
-        }
-        const data = await response.json()
+        // 使用新的SDK获取MBTI题目
+        const { sdk } = await import('@/lib/backend-api')
+        const data = await sdk.getSurveyQuestions('mbti')
         setQuestions(data.questions)
       } catch (error) {
         console.error('Error fetching questions:', error)
