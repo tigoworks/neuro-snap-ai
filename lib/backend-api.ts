@@ -102,4 +102,30 @@ export const sdk = {
   getAnalysisStatus: (surveyId: string) => neuroSnapAPI?.getAnalysisStatus(surveyId),
   waitForAnalysis: (surveyId: string, maxAttempts?: number, interval?: number) => 
     neuroSnapAPI?.waitForAnalysis(surveyId, maxAttempts, interval),
-}; 
+  getAnalysisResult: (surveyId: string) => neuroSnapAPI?.getAnalysisResult(surveyId),
+  pollAnalysisResult: (
+    surveyId: string, 
+    options?: {
+      maxAttempts?: number;
+      interval?: number;
+      onProgress?: (attempt: number, maxAttempts: number) => void;
+    }
+  ) => neuroSnapAPI?.pollAnalysisResult(surveyId, options),
+};
+
+// 获取分析结果
+export async function getAnalysisResult(surveyId: string) {
+  return await sdk.getAnalysisResult(surveyId);
+}
+
+// 轮询获取分析结果
+export async function pollAnalysisResult(
+  surveyId: string, 
+  options?: {
+    maxAttempts?: number;
+    interval?: number;
+    onProgress?: (attempt: number, maxAttempts: number) => void;
+  }
+) {
+  return await sdk.pollAnalysisResult(surveyId, options);
+} 

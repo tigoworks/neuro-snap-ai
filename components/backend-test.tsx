@@ -10,6 +10,8 @@ export default function BackendTest() {
   const [fiveQResult, setFiveQResult] = useState<string>('');
   const [mbtiResult, setMbtiResult] = useState<string>('');
   const [submitResult, setSubmitResult] = useState<string>('');
+  const [result, setResult] = useState<{ title: string; data: any; timestamp: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // 检查后端健康状态
@@ -191,6 +193,66 @@ export default function BackendTest() {
     }
   };
 
+  // 测试获取分析结果
+  const testGetAnalysisResult = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // 使用一个示例surveyId进行测试
+      const testSurveyId = 'd16f36ea-f9ae-415c-8f97-d39aa96803fc';
+      
+      console.log('🔍 测试获取分析结果:', testSurveyId);
+      
+      const result = await sdk.getAnalysisResult(testSurveyId);
+      
+      setResult({
+        title: '获取分析结果测试',
+        data: result,
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (err) {
+      console.error('获取分析结果测试失败:', err);
+      setError(err instanceof Error ? err.message : '获取分析结果测试失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 测试轮询分析结果
+  const testPollAnalysisResult = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // 使用一个示例surveyId进行测试
+      const testSurveyId = 'd16f36ea-f9ae-415c-8f97-d39aa96803fc';
+      
+      console.log('🔄 测试轮询分析结果:', testSurveyId);
+      
+      const result = await sdk.pollAnalysisResult(testSurveyId, {
+        maxAttempts: 5,
+        interval: 1000,
+        onProgress: (current, total) => {
+          console.log(`轮询进度: ${current}/${total}`);
+        }
+      });
+      
+      setResult({
+        title: '轮询分析结果测试',
+        data: result,
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (err) {
+      console.error('轮询分析结果测试失败:', err);
+      setError(err instanceof Error ? err.message : '轮询分析结果测试失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-6 bg-gray-50 rounded-lg">
       <h3 className="text-lg font-semibold mb-4">后端服务连接测试</h3>
@@ -292,6 +354,43 @@ export default function BackendTest() {
         <div className="mt-4 p-4 bg-white rounded border">
           <h4 className="font-medium mb-2">答案提交测试结果:</h4>
           <pre className="text-sm overflow-auto">{submitResult}</pre>
+        </div>
+      )}
+
+      {/* 分析结果测试按钮 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <button
+          onClick={testGetAnalysisResult}
+          disabled={loading}
+          className="bg-purple-500 text-white p-4 rounded-lg hover:bg-purple-600 disabled:opacity-50 transition-colors"
+        >
+          测试获取分析结果
+        </button>
+        
+        <button
+          onClick={testPollAnalysisResult}
+          disabled={loading}
+          className="bg-indigo-500 text-white p-4 rounded-lg hover:bg-indigo-600 disabled:opacity-50 transition-colors"
+        >
+          测试轮询分析结果
+        </button>
+      </div>
+
+      {/* 分析结果测试结果 */}
+      {result && (
+        <div className="mt-4 p-4 bg-white rounded border">
+          <h4 className="font-medium mb-2">分析结果测试结果:</h4>
+          <p>{result.title}</p>
+          <p>时间: {result.timestamp}</p>
+          <pre className="text-sm overflow-auto">{JSON.stringify(result.data, null, 2)}</pre>
+        </div>
+      )}
+
+      {/* 错误信息 */}
+      {error && (
+        <div className="mt-4 p-4 bg-red-500 text-white rounded border">
+          <h4 className="font-medium mb-2">错误信息:</h4>
+          <pre className="text-sm overflow-auto">{error}</pre>
         </div>
       )}
 

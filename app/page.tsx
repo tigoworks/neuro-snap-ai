@@ -14,6 +14,7 @@ import ValuesTest from "@/components/values-test"
 import SubmissionPage from "@/components/submission-page"
 import ProgressBar from "@/components/progress-bar"
 import { useRouter } from "next/navigation"
+import AnalysisResult from '../components/analysis-result'
 
 // 定义所有测试数据的类型
 interface UserInfo {
@@ -143,6 +144,8 @@ export default function PersonalityTest() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [showAnalysisResult, setShowAnalysisResult] = useState(false)
+  const [surveyId, setSurveyId] = useState<string | null>(null)
 
   useEffect(() => {
     console.log('PersonalityTest mounted');
@@ -247,6 +250,14 @@ export default function PersonalityTest() {
       const result = await sdk.submitCompleteAnswers(completeAnswers)
       console.log('提交成功:', result)
       
+      if (result.success && result.data && result.data.surveyId) {
+        setSurveyId(result.data.surveyId)
+        setShowAnalysisResult(true)
+        console.log('🎉 提交完成，开始显示分析结果:', result.data.surveyId)
+      } else {
+        throw new Error('提交响应格式错误')
+      }
+      
       handleNext()
     } catch (error) {
       console.error('提交失败:', error)
@@ -333,6 +344,18 @@ export default function PersonalityTest() {
       default:
         return null
     }
+  }
+
+  if (showAnalysisResult && surveyId) {
+    return (
+      <AnalysisResult 
+        surveyId={surveyId}
+        onBack={() => {
+          setShowAnalysisResult(false)
+          setSurveyId(null)
+        }}
+      />
+    )
   }
 
   return (
