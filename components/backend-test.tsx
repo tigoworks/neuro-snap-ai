@@ -367,6 +367,7 @@ export default function BackendTest() {
           <div><strong>获取MBTI题目:</strong> <code className="ml-2 bg-white px-2 py-1 rounded">{apiConfig.baseURL}/api/survey/model?code=mbti</code></div>
           <div><strong>提交答案:</strong> <code className="ml-2 bg-white px-2 py-1 rounded">{apiConfig.baseURL}/api/answer/submit</code></div>
           <div><strong>保存用户信息:</strong> <code className="ml-2 bg-white px-2 py-1 rounded">{apiConfig.baseURL}/api/user/info</code></div>
+          <div><strong>获取分析结果:</strong> <code className="ml-2 bg-white px-2 py-1 rounded">{apiConfig.baseURL}/api/analysis-result/user/{'{userId}'}</code></div>
         </div>
       </div>
 
