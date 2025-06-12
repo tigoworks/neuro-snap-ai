@@ -353,7 +353,7 @@ export default function APIDemo() {
                     className="bg-red-500 text-white p-4 rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors"
                   >
                     <div className="text-lg font-semibold">📊 获取分析结果</div>
-                    <div className="text-sm opacity-90">GET /analysis-result/user/&#123;surveyId&#125;</div>
+                    <div className="text-sm opacity-90">GET /api/analysis-result/user/&#123;surveyId&#125;</div>
                   </button>
                   
                   <button
@@ -371,7 +371,7 @@ export default function APIDemo() {
                     className="bg-teal-500 text-white p-4 rounded-lg hover:bg-teal-600 disabled:opacity-50 transition-colors"
                   >
                     <div className="text-lg font-semibold">📚 获取分析历史</div>
-                    <div className="text-sm opacity-90">GET /analysis-result/user/&#123;userId&#125;/history</div>
+                    <div className="text-sm opacity-90">GET /api/analysis-result/user/&#123;userId&#125;/history</div>
                   </button>
                   
                   <button
@@ -380,7 +380,7 @@ export default function APIDemo() {
                     className="bg-pink-500 text-white p-4 rounded-lg hover:bg-pink-600 disabled:opacity-50 transition-colors"
                   >
                     <div className="text-lg font-semibold">📋 获取分析摘要</div>
-                    <div className="text-sm opacity-90">GET /analysis-result/user/&#123;userId&#125;/summary</div>
+                    <div className="text-sm opacity-90">GET /api/analysis-result/user/&#123;userId&#125;/summary</div>
                   </button>
                 </div>
               </div>
