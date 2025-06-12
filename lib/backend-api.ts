@@ -1,5 +1,7 @@
-// 后端API集成文件
+// 后端API包装器 - TypeScript版本
 // 用于连接后端服务和前端SDK
+
+import { neuroSnapAPI } from './frontend-sdk.js';
 
 // 获取环境变量
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -20,38 +22,9 @@ export const apiConfig = {
   apiKey: FRONTEND_API_KEY,
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${FRONTEND_API_KEY}`,
+    'X-Frontend-Key': FRONTEND_API_KEY,
   },
 };
-
-// 通用API请求函数
-export async function apiRequest(endpoint: string, options: RequestInit = {}) {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
-  const config: RequestInit = {
-    ...options,
-    headers: {
-      ...apiConfig.headers,
-      ...options.headers,
-    },
-  };
-
-  try {
-    console.log(`🚀 API请求: ${options.method || 'GET'} ${url}`);
-    const response = await fetch(url, config);
-    
-    if (!response.ok) {
-      throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    console.log('✅ API响应成功:', data);
-    return data;
-  } catch (error) {
-    console.error('❌ API请求失败:', error);
-    throw error;
-  }
-}
 
 // 后端服务健康检查
 export async function checkBackendHealth() {
@@ -64,68 +37,18 @@ export async function checkBackendHealth() {
   }
 }
 
-// 导入SDK
-let NeuroSnapAPI: any = null;
-let neuroSnapAPI: any = null;
-let NeuroSnapHooks: any = null;
+// 导出所有API方法，提供TypeScript类型支持
+export const checkAIStatus = () => neuroSnapAPI.checkAIStatus();
+export const checkSystemHealth = () => neuroSnapAPI.checkSystemHealth();
+export const getSurveyQuestions = (modelCode: string) => neuroSnapAPI.getSurveyQuestions(modelCode);
+export const submitTest = (testData: any) => neuroSnapAPI.submitTest(testData);
+export const getAnalysisResult = (surveyId: string) => neuroSnapAPI.getAnalysisResult(surveyId);
+export const pollAnalysisResult = (surveyId: string, options?: any) => neuroSnapAPI.pollAnalysisResult(surveyId, options);
+export const getAnalysisHistory = (userId: string, limit?: number, offset?: number) => neuroSnapAPI.getAnalysisHistory(userId, limit, offset);
+export const getAnalysisSummary = (userId: string) => neuroSnapAPI.getAnalysisSummary(userId);
 
-try {
-  // 动态导入SDK
-  const sdk = require('./frontend-sdk.js');
-  NeuroSnapAPI = sdk.NeuroSnapAPI;
-  neuroSnapAPI = sdk.neuroSnapAPI;
-  NeuroSnapHooks = sdk.NeuroSnapHooks;
-  console.log('✅ Frontend SDK 加载成功');
-} catch (error) {
-  console.warn('⚠️ Frontend SDK 未找到，请确保已将SDK文件复制到lib文件夹');
-}
+// 保持向后兼容的方法
+export const submitCompleteAnswers = (testData: any) => neuroSnapAPI.submitTest(testData);
 
-// 重新导出SDK相关功能
-export { NeuroSnapAPI, neuroSnapAPI, NeuroSnapHooks };
-
-// SDK包装函数，提供更便捷的API
-export const sdk = {
-  // 用户相关
-  saveUserInfo: (userInfo: any) => neuroSnapAPI?.saveUserInfo(userInfo),
-  getUserInfo: (userId: string) => neuroSnapAPI?.getUserInfo(userId),
-  
-  // 测试相关
-  getSurveyQuestions: (modelCode: string) => neuroSnapAPI?.getSurveyQuestions(modelCode),
-  getAllModels: () => neuroSnapAPI?.getAllModels(),
-  submitAnswers: (userId: string, modelCode: string, answers: any) => 
-    neuroSnapAPI?.submitAnswers(userId, modelCode, answers),
-  submitCompleteAnswers: (completeAnswers: any) => 
-    neuroSnapAPI?.submitCompleteAnswers(completeAnswers),
-  
-  // 分析相关
-  triggerAnalysis: (analysisRequest: any) => neuroSnapAPI?.triggerAnalysis(analysisRequest),
-  getAnalysisStatus: (surveyId: string) => neuroSnapAPI?.getAnalysisStatus(surveyId),
-  waitForAnalysis: (surveyId: string, maxAttempts?: number, interval?: number) => 
-    neuroSnapAPI?.waitForAnalysis(surveyId, maxAttempts, interval),
-  getAnalysisResult: (surveyId: string) => neuroSnapAPI?.getAnalysisResult(surveyId),
-  pollAnalysisResult: (
-    surveyId: string, 
-    options?: {
-      maxAttempts?: number;
-      interval?: number;
-      onProgress?: (attempt: number, maxAttempts: number) => void;
-    }
-  ) => neuroSnapAPI?.pollAnalysisResult(surveyId, options),
-};
-
-// 获取分析结果
-export async function getAnalysisResult(surveyId: string) {
-  return await sdk.getAnalysisResult(surveyId);
-}
-
-// 轮询获取分析结果
-export async function pollAnalysisResult(
-  surveyId: string, 
-  options?: {
-    maxAttempts?: number;
-    interval?: number;
-    onProgress?: (attempt: number, maxAttempts: number) => void;
-  }
-) {
-  return await sdk.pollAnalysisResult(surveyId, options);
-} 
+// 导出API实例
+export { neuroSnapAPI }; 
