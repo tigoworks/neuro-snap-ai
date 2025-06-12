@@ -233,7 +233,7 @@ export default function BackendTest() {
       
       const result = await sdk.pollAnalysisResult(testSurveyId, {
         maxAttempts: 5,
-        interval: 1000,
+        interval: 6000, // 6秒间隔，避免触发速率限制
         onProgress: (current, total) => {
           console.log(`轮询进度: ${current}/${total}`);
         }

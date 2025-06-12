@@ -48,7 +48,7 @@ interface AnalysisData {
 
 export default function AnalysisResult({ surveyId, onBack }: AnalysisResultProps) {
   const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState({ current: 0, total: 30 });
+  const [progress, setProgress] = useState({ current: 0, total: 20 });
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,8 +64,8 @@ export default function AnalysisResult({ surveyId, onBack }: AnalysisResultProps
       setError(null);
 
       const result = await pollAnalysisResult(surveyId, {
-        maxAttempts: 30,
-        interval: 2000,
+        maxAttempts: 20,
+        interval: 5000, // 5秒间隔，避免触发速率限制
         onProgress: (current: number, total: number) => {
           setProgress({ current, total });
         }
