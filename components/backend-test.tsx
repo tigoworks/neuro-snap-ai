@@ -253,6 +253,86 @@ export default function BackendTest() {
     }
   };
 
+  // 测试完整提交
+  const testCompleteSubmission = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // 构建测试数据
+      const testData = {
+        userInfo: {
+          name: "测试用户",
+          age: 25,
+          gender: "male",
+          education: "本科",
+          occupation: "软件工程师",
+          location: "北京"
+        },
+        fiveQuestions: {
+          q1: "我希望在技术领域有所突破",
+          q2: "学习新的编程语言和框架",
+          q3: "成为技术专家",
+          q4: "解决复杂的技术问题",
+          q5: "在团队中发挥技术领导作用"
+        },
+        mbti: {
+          q1: "A",
+          q2: "B", 
+          q3: "A",
+          q4: "B",
+          q5: "A"
+        },
+        bigFive: {
+          q1: 4,
+          q2: 3,
+          q3: 5,
+          q4: 4,
+          q5: 3
+        },
+        disc: {
+          q1: "D",
+          q2: "I",
+          q3: "S", 
+          q4: "C",
+          q5: "D"
+        },
+        holland: {
+          q1: "I",
+          q2: "R",
+          q3: "A",
+          q4: "S",
+          q5: "E"
+        },
+        values: {
+          q1: "成就感",
+          q2: "技术专长",
+          q3: "团队合作",
+          q4: "创新",
+          q5: "学习成长"
+        }
+      };
+      
+      console.log('🧪 测试完整提交:', testData);
+      
+      const result = await sdk.submitCompleteAnswers(testData);
+      
+      console.log('✅ 完整提交测试结果:', result);
+      
+      setResult({
+        title: '完整提交测试',
+        data: result,
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (err) {
+      console.error('完整提交测试失败:', err);
+      setError(err instanceof Error ? err.message : '完整提交测试失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-6 bg-gray-50 rounded-lg">
       <h3 className="text-lg font-semibold mb-4">后端服务连接测试</h3>
@@ -357,24 +437,32 @@ export default function BackendTest() {
         </div>
       )}
 
-      {/* 分析结果测试按钮 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        <button
-          onClick={testGetAnalysisResult}
-          disabled={loading}
-          className="bg-purple-500 text-white p-4 rounded-lg hover:bg-purple-600 disabled:opacity-50 transition-colors"
-        >
-          测试获取分析结果
-        </button>
-        
-        <button
-          onClick={testPollAnalysisResult}
-          disabled={loading}
-          className="bg-indigo-500 text-white p-4 rounded-lg hover:bg-indigo-600 disabled:opacity-50 transition-colors"
-        >
-          测试轮询分析结果
-        </button>
-      </div>
+             {/* 提交和分析结果测试按钮 */}
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+         <button
+           onClick={testCompleteSubmission}
+           disabled={loading}
+           className="bg-green-500 text-white p-4 rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors"
+         >
+           测试完整提交
+         </button>
+         
+         <button
+           onClick={testGetAnalysisResult}
+           disabled={loading}
+           className="bg-purple-500 text-white p-4 rounded-lg hover:bg-purple-600 disabled:opacity-50 transition-colors"
+         >
+           测试获取分析结果
+         </button>
+         
+         <button
+           onClick={testPollAnalysisResult}
+           disabled={loading}
+           className="bg-indigo-500 text-white p-4 rounded-lg hover:bg-indigo-600 disabled:opacity-50 transition-colors"
+         >
+           测试轮询分析结果
+         </button>
+       </div>
 
       {/* 分析结果测试结果 */}
       {result && (
