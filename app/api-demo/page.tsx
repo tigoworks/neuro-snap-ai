@@ -241,7 +241,9 @@ export default function APIDemo() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium">Base URL:</span> 
-                <code className="ml-2 bg-white px-2 py-1 rounded">http://localhost:8080/api</code>
+                <code className="ml-2 bg-white px-2 py-1 rounded">
+                  {process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api'}
+                </code>
               </div>
               <div>
                 <span className="font-medium">认证方式:</span> 
@@ -249,7 +251,9 @@ export default function APIDemo() {
               </div>
               <div>
                 <span className="font-medium">API Key:</span> 
-                <code className="ml-2 bg-white px-2 py-1 rounded">test-frontend-key-123</code>
+                <code className="ml-2 bg-white px-2 py-1 rounded">
+                  {process.env.NEXT_PUBLIC_FRONTEND_API_KEY || 'test-frontend-key-123'}
+                </code>
               </div>
               <div>
                 <span className="font-medium">数据格式:</span> 
