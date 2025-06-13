@@ -1,10 +1,11 @@
 'use client'
 
 import { StagewiseToolbar } from '@stagewise/toolbar-next'
+import { ReactPlugin } from '@stagewise-plugins/react'
 import { useEffect, useState } from 'react'
 
 const stagewiseConfig = {
-  plugins: []
+  plugins: [ReactPlugin]
 }
 
 export default function StagewiseToolbarWrapper() {
